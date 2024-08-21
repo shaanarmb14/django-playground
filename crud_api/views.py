@@ -2,8 +2,30 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
+import logging
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
+
 from .models import Movie
 from .serializers import MovieSerializer
+
+trace.set_tracer_provider(
+    TracerProvider(
+        resource=Resource.create({"service.name": "crud-api"})
+    )
+)
+tracer = trace.get_tracer(__name__)
+
+otlp_exporter = OTLPSpanExporter(endpoint="localhost:4317", insecure=True)
+span_processor = BatchSpanProcessor(otlp_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("crud_api")
 
 # Create your views here.
 @api_view(['GET', 'POST'])
@@ -36,12 +58,15 @@ def __getMovies(request):
     return Response(serializer.data)
 
 def __getMovieByID(request, movie_id):
-    try:
-        movie = Movie.objects.get(id=movie_id)
-        serializer = MovieSerializer(movie)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    except Movie.DoesNotExist:
-        return Response({"error": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
+    with tracer.start_as_current_span("get-movie-by-id"):
+        try:
+            movie = Movie.objects.get(id=movie_id)
+            serializer = MovieSerializer(movie)
+            logger.info(f"Movie with ID {movie_id} retrieved successfully.")
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Movie.DoesNotExist:
+            logger.error(f"Movie with ID {movie_id} not found.")
+            return Response({"error": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
 
 def __createMovie(request):
     serializer = MovieSerializer(data=request.data)
