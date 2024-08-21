@@ -23,9 +23,17 @@ def movie_by_id_handler(request, movie_id):
         return __updateMovie(request, movie_id)
     
 def __getMovies(request):
-    movies = Movie.objects.all()
-    list = MovieSerializer(movies,many=True)
-    return Response(list.data)
+    queryset = Movie.objects.all()
+    title = request.query_params.get('title')
+    genre = request.query_params.get('genre')
+
+    if title is not None:
+        queryset = queryset.filter(title=title)
+    if genre is not None:
+        queryset = queryset.filter(genre=genre)
+
+    serializer = MovieSerializer(queryset, many=True)
+    return Response(serializer.data)
 
 def __getMovieByID(request, movie_id):
     try:
