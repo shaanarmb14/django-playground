@@ -1,9 +1,10 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from .models import Movie
-from .serializers import MovieSerializer
+from .serializers import MovieDetailSerializer, MovieSerializer
 
 # Create your views here.
 @api_view(['GET', 'POST'])
@@ -36,35 +37,26 @@ def __getMovies(request):
     return Response(serializer.data)
 
 def __getMovieByID(request, movie_id):
-    try:
-        movie = Movie.objects.get(id=movie_id)
-        serializer = MovieSerializer(movie)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    except Movie.DoesNotExist:
-        return Response({"error": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
+    movie = get_object_or_404(Movie, id=movie_id)
+    serializer = MovieDetailSerializer(movie)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 def __createMovie(request):
     serializer = MovieSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 def __updateMovie(request, movie_id):
-    try:
-        movie = Movie.objects.get(id=movie_id)
-        serializer = MovieSerializer(movie, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    movie = get_object_or_404(Movie, id=movie_id)
+    serializer = MovieSerializer(movie, data=request.data)
+    if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Movie.DoesNotExist:
-        return Response({"error": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 def __deleteMovie(request, movie_id):
-    try:
-        movie = Movie.objects.get(id=movie_id)
-        movie.delete()
-        return Response({"message": "Movie deleted."}, status=status.HTTP_200_OK)
-    except Movie.DoesNotExist:
-        return Response({"error": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
+    movie = get_object_or_404(Movie, id=movie_id)
+    movie.delete()
+    return Response({"message": "Movie deleted."}, status=status.HTTP_200_OK)
