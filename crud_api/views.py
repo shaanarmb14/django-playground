@@ -2,11 +2,26 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 
 from .models import Movie
 from .serializers import MovieDetailSerializer, MovieSerializer
 
-# Create your views here.
+@extend_schema(
+    tags=['Movies'],
+    methods=['GET'],
+    parameters=[
+        OpenApiParameter(name='title', description='Filter by movie title', required=False, type=str),
+        OpenApiParameter(name='genre', description='Filter by movie genre', required=False, type=str),
+    ],
+    responses={200: MovieSerializer(many=True)}
+)
+@extend_schema(
+    tags=['Movies'],
+    methods=['POST'],
+    request=MovieSerializer,
+    responses={201: MovieSerializer}
+)
 @api_view(['GET', 'POST'])
 def index(request):
     if request.method == 'GET':
@@ -14,6 +29,28 @@ def index(request):
     elif request.method == 'POST':
         return __createMovie(request)
 
+@extend_schema(
+    tags=['Movies'],
+    methods=['GET'],
+    responses={200: MovieDetailSerializer}
+)
+@extend_schema(
+    tags=['Movies'],
+    methods=['DELETE'],
+    responses={
+        200: OpenApiExample(
+            'Successful Response',
+            value={'message': 'Movie deleted.'},
+            response_only=True,
+        )
+    }
+)
+@extend_schema(
+    tags=['Movies'],
+    methods=['PATCH'],
+    request=MovieSerializer,
+    responses={200: MovieSerializer}
+)
 @api_view(['GET', 'DELETE', 'PATCH'])
 def movie_by_id_handler(request, movie_id):
     if request.method == 'GET':
