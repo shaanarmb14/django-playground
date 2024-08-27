@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class CrudApiConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'crud_api'
+    name = 'movie_api'
