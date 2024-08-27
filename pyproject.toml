@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "movie-api"
+version = "0.1.0"
+description = ""
+authors = ["shaanarmb14 <shaan.arora@mudbath.com.au>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1"
+django-ninja = "^1.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

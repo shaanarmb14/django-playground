@@ -37,8 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'drf_spectacular',
     'crud_api',
     'review_api',
 ]
@@ -102,28 +100,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-
-# Rest Framework
-REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ],
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
-
-# DRF Spectactular
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Playground API',
-    'DESCRIPTION': 'Lorem Ipsum',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'SCHEMA_PATH_PREFIX': '/api/v1/',
-    'TAGS': [
-        {'name': 'Movies', 'description': 'Movie-related operations'},
-        {'name': 'Reviews', 'description': 'Review-related operations'},
-    ],
-}
 
 
 # Internationalization
