@@ -1,4 +1,5 @@
-from ninja import ModelSchema
+from datetime import date
+from ninja import ModelSchema, Schema
 from .models import Cinema, Movie, MovieCinema
 
 class MovieSchema(ModelSchema):
@@ -10,6 +11,15 @@ class CreateMovieSchema(ModelSchema):
     class Meta:
         model = Movie
         exclude = ['id']
+
+class UpdateMovieSchema(Schema):
+    title: str
+    release_date: date
+    genre: str
+    runtime: int
+    synopsis: str
+    director: str
+    rating: str
 
 class CinemaSchema(ModelSchema):
     class Meta:
